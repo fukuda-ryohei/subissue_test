@@ -8,7 +8,18 @@ jobs:
   create-sub-issue:
     runs-on: ubuntu-latest
     steps:
+    - name: Check if the issue uses the develop template
+      id: check_template
+      uses: actions/github-script@v3
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const issue_body = context.payload.issue.body;
+          const is_develop_template = issue_body.includes('This is a develop issue template');
+          return { is_develop_template };
+
     - name: Create Sub-Issue
+      if: steps.check_template.outputs.is_develop_template == 'true'
       uses: actions/github-script@v3
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
