@@ -14,18 +14,19 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
+          const fs = require('fs');
           const issue_body = context.payload.issue.body;
           const is_develop_template = issue_body.includes('This is a develop issue template');
-          core.setOutput('is_develop_template', is_develop_template);
+          fs.writeFileSync(process.env.GITHUB_ENV, `IS_DEVELOP_TEMPLATE=${is_develop_template}\n`);
 
     - name: Read sub-issue template
       id: read_template
-      if: steps.check_template.outputs.is_develop_template == 'true'
+      if: env.IS_DEVELOP_TEMPLATE == 'true'
       run: |
-        echo "::set-output name=sub_issue_template::$(cat .github/ISSUE_TEMPLATE/sub.md | sed -n '/^---$/,$!p')"
+        echo "SUB_ISSUE_TEMPLATE=$(sed -n '/^---$/,$!p' < .github/ISSUE_TEMPLATE/sub.md)" >> $GITHUB_ENV
 
     - name: Create Sub-Issue
-      if: steps.check_template.outputs.is_develop_template == 'true'
+      if: env.IS_DEVELOP_TEMPLATE == 'true'
       uses: actions/github-script@v3
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -46,5 +47,3 @@ jobs:
             issue_number,
             body: `Sub-issue created: #${newIssue.data.number}`
           });
-      env:
-        SUB_ISSUE_TEMPLATE: ${{ steps.read_template.outputs.sub_issue_template }}
