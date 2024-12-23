@@ -1,61 +1,24 @@
-name: Create Sub-Issue
+name: Create Sub Issues
 
 on:
   issues:
     types: [opened]
 
-permissions:
-  issues: write
-  contents: read
-
 jobs:
-  create-sub-issue:
+  create_sub_issues:
     runs-on: ubuntu-latest
+    if: github.event.issue.labels.* contains 'main-issue'
     steps:
-    - name: Check out repository
-      uses: actions/checkout@v2
+      - name: Create sub-issue 1
+        uses: peter-evans/create-issue-from-file@v3
+        with:
+          title: 'サブIssue 1のタイトル'
+          content-filepath: './.github/ISSUE_TEMPLATE/sub_issue_1.md'
+          labels: 'sub-issue'
 
-    - name: Check if the issue uses the develop template
-      id: check_template
-      uses: actions/github-script@v3
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const core = require('@actions/core');
-          const issue_body = context.payload.issue.body;
-          const is_develop_template = issue_body.includes('This is a develop issue template');
-          core.setOutput('is_develop_template', is_develop_template);
-
-    - name: Read sub-issue template
-      id: read_template
-      if: steps.check_template.outputs.is_develop_template == 'true'
-      run: |
-        sub_issue_template=$(sed -n '/^---$/,$!p' .github/ISSUE_TEMPLATE/sub.md)
-        echo "SUB_ISSUE_TEMPLATE<<EOF" >> $GITHUB_ENV
-        echo "$sub_issue_template" >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
-
-    - name: Create Sub-Issue
-      if: steps.check_template.outputs.is_develop_template == 'true'
-      uses: actions/github-script@v3
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const { owner, repo } = context.repo;
-          const issue_number = context.payload.issue.number;
-          const subIssueBody = process.env.SUB_ISSUE_TEMPLATE;
-          const newIssue = await github.issues.create({
-            owner,
-            repo,
-            title: `Sub-Issue for #${issue_number}`,
-            body: subIssueBody,
-            labels: ['sub-issue'],
-          });
-          await github.issues.createComment({
-            owner,
-            repo,
-            issue_number,
-            body: `Sub-issue created: #${newIssue.data.number}`
-          });
-      env:
-        SUB_ISSUE_TEMPLATE: ${{ steps.read_template.outputs.sub_issue_template }}
+      - name: Create sub-issue 2
+        uses: peter-evans/create-issue-from-file@v3
+        with:
+          title: 'サブIssue 2のタイトル'
+          content-filepath: './.github/ISSUE_TEMPLATE/sub_issue_2.md'
+          labels: 'sub-issue'
