@@ -23,10 +23,12 @@ jobs:
       - name: Check issue template
         id: check_template
         run: |
+          node -e "
           const fs = require('fs');
           const issue_body = process.env.GITHUB_EVENT_PATH ? require(process.env.GITHUB_EVENT_PATH).issue.body : '';
           const is_develop_template = issue_body.includes('This is a develop issue template');
           fs.writeFileSync(process.env.GITHUB_ENV, `IS_DEVELOP_TEMPLATE=${is_develop_template}\n`);
+          "
 
       - name: Read sub-issue template
         id: read_template
