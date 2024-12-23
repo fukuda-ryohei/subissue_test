@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-<!-- This is a develop issue template. Please provide the following details: -->
+This is a develop issue template. Please provide the following details:
 
 
 <!-- 詳細は=>のDocbase記事を参照。https://nxt-sys.docbase.io/posts/306734/edit#%E4%B8%8D%E5%85%B7%E5%90%88%E5%AF%BE%E5%BF%9C  -->

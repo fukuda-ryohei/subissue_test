@@ -8,6 +8,6 @@ assignees: ''
 
 # Sub-Issue Template
 
-<!-- This is a sub-issue for the parent issue. -->
+This is a sub-issue for the parent issue.
 
 
