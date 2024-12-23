@@ -26,11 +26,12 @@ jobs:
         script: |
           const { owner, repo } = context.repo;
           const issue_number = context.payload.issue.number;
+          const subIssueTemplate = `# Sub-Issue Template\n\nThis is a sub-issue for the parent issue.`;
           const newIssue = await github.issues.create({
             owner,
             repo,
             title: `Sub-Issue for #${issue_number}`,
-            body: `This is a sub-issue for the parent issue #${issue_number}`,
+            body: subIssueTemplate,
             labels: ['sub-issue'],
           });
           await github.issues.createComment({
