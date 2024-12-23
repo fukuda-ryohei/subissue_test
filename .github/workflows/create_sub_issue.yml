@@ -7,7 +7,7 @@ on:
 jobs:
   create_sub_issues:
     runs-on: ubuntu-latest
-    if: github.event.issue.labels.* contains 'main-issue'
+    if: contains(join(github.event.issue.labels.*.name, ','), 'main-issue')
     steps:
       - name: Create sub-issue 1
         uses: peter-evans/create-issue-from-file@v3
