@@ -1,0 +1,30 @@
+name: Create Sub-Issue
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  create-sub-issue:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create Sub-Issue
+      uses: actions/github-script@v3
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const { owner, repo } = context.repo;
+          const issue_number = context.payload.issue.number;
+          const newIssue = await github.issues.create({
+            owner,
+            repo,
+            title: `Sub-Issue for #${issue_number}`,
+            body: `This is a sub-issue for the parent issue #${issue_number}`,
+            labels: ['sub-issue'],
+          });
+          await github.issues.createComment({
+            owner,
+            repo,
+            issue_number,
+            body: `Sub-issue created: #${newIssue.data.number}`
+          });
