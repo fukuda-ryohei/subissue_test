@@ -1,4 +1,3 @@
-
 name: Create Sub-Issue
 
 on:
@@ -7,7 +6,7 @@ on:
 
 jobs:
   create-sub-issue:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
     - name: Check if the issue uses the develop template
       id: check_template
@@ -17,7 +16,7 @@ jobs:
         script: |
           const issue_body = context.payload.issue.body;
           const is_develop_template = issue_body.includes('This is a develop issue template');
-          return { is_develop_template };
+          core.setOutput('is_develop_template', is_develop_template);
 
     - name: Read sub-issue template
       id: read_template
