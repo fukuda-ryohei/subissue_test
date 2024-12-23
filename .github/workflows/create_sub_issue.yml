@@ -21,16 +21,17 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
+          const core = require('@actions/core');
           const issue_body = context.payload.issue.body;
           const is_develop_template = issue_body.includes('This is a develop issue template');
-          return { is_develop_template };
+          core.setOutput('is_develop_template', is_develop_template);
 
     - name: Read sub-issue template
       id: read_template
       if: steps.check_template.outputs.is_develop_template == 'true'
       run: |
         sub_issue_template=$(sed -n '/^---$/,$!p' .github/ISSUE_TEMPLATE/sub.md)
-        echo "sub_issue_template<<EOF" >> $GITHUB_ENV
+        echo "SUB_ISSUE_TEMPLATE<<EOF" >> $GITHUB_ENV
         echo "$sub_issue_template" >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
 
@@ -42,7 +43,7 @@ jobs:
         script: |
           const { owner, repo } = context.repo;
           const issue_number = context.payload.issue.number;
-          const subIssueBody = process.env.sub_issue_template;
+          const subIssueBody = process.env.SUB_ISSUE_TEMPLATE;
           const newIssue = await github.issues.create({
             owner,
             repo,
@@ -56,3 +57,5 @@ jobs:
             issue_number,
             body: `Sub-issue created: #${newIssue.data.number}`
           });
+      env:
+        SUB_ISSUE_TEMPLATE: ${{ steps.read_template.outputs.sub_issue_template }}
