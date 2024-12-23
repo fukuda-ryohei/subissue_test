@@ -1,3 +1,4 @@
+
 name: Create Sub-Issue
 
 on:
@@ -18,6 +19,12 @@ jobs:
           const is_develop_template = issue_body.includes('This is a develop issue template');
           return { is_develop_template };
 
+    - name: Read sub-issue template
+      id: read_template
+      if: steps.check_template.outputs.is_develop_template == 'true'
+      run: |
+        echo "::set-output name=sub_issue_template::$(cat .github/ISSUE_TEMPLATE/sub.md | sed -n '/^---$/,$!p')"
+
     - name: Create Sub-Issue
       if: steps.check_template.outputs.is_develop_template == 'true'
       uses: actions/github-script@v3
@@ -26,12 +33,12 @@ jobs:
         script: |
           const { owner, repo } = context.repo;
           const issue_number = context.payload.issue.number;
-          const subIssueTemplate = `# Sub-Issue Template\n\nThis is a sub-issue for the parent issue.`;
+          const subIssueBody = process.env.SUB_ISSUE_TEMPLATE;
           const newIssue = await github.issues.create({
             owner,
             repo,
             title: `Sub-Issue for #${issue_number}`,
-            body: subIssueTemplate,
+            body: subIssueBody,
             labels: ['sub-issue'],
           });
           await github.issues.createComment({
@@ -40,3 +47,5 @@ jobs:
             issue_number,
             body: `Sub-issue created: #${newIssue.data.number}`
           });
+      env:
+        SUB_ISSUE_TEMPLATE: ${{ steps.read_template.outputs.sub_issue_template }}
