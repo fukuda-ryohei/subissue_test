@@ -10,8 +10,11 @@ permissions:
 
 jobs:
   create-sub-issue:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+
     - name: Check if the issue uses the develop template
       id: check_template
       uses: actions/github-script@v3
@@ -26,7 +29,10 @@ jobs:
       id: read_template
       if: steps.check_template.outputs.is_develop_template == 'true'
       run: |
-        echo "::set-output name=sub_issue_template::$(cat .github/ISSUE_TEMPLATE/sub.md | sed -n '/^---$/,$!p')"
+        sub_issue_template=$(sed -n '/^---$/,$!p' .github/ISSUE_TEMPLATE/sub.md)
+        echo "sub_issue_template<<EOF" >> $GITHUB_ENV
+        echo "$sub_issue_template" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
 
     - name: Create Sub-Issue
       if: steps.check_template.outputs.is_develop_template == 'true'
@@ -36,7 +42,7 @@ jobs:
         script: |
           const { owner, repo } = context.repo;
           const issue_number = context.payload.issue.number;
-          const subIssueBody = process.env.SUB_ISSUE_TEMPLATE;
+          const subIssueBody = process.env.sub_issue_template;
           const newIssue = await github.issues.create({
             owner,
             repo,
@@ -50,5 +56,3 @@ jobs:
             issue_number,
             body: `Sub-issue created: #${newIssue.data.number}`
           });
-      env:
-        SUB_ISSUE_TEMPLATE: ${{ steps.read_template.outputs.sub_issue_template }}
